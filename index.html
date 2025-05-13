@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Романтическая история</title>
+  <style>
+    * { box-sizing: border-box; }
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #333; display: flex; justify-content: center; align-items: center; }
+    #story {
+      position: relative;
+      width: 100%;       /* адаптивная ширина */
+      max-width: 600px;   /* ограничение максимальной ширины */
+      aspect-ratio: 3 / 4;/* соотношение сторон (600×800) */
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+    }
+    #slide-image {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    #overlay {
+      position:absolute;
+      left:0; right:0; bottom:0;
+      background:rgba(0,0,0,0.6);
+      color:#fff;
+      padding:2% 4%;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+      font-family:Arial, sans-serif;
+      max-height:40%;
+      overflow-y:auto;
+    }
+    #text {
+      font-size: 4vw;       /* масштабируемый размер текста */
+      line-height: 1.2;
+      margin-bottom: 2vh;
+    }
+    #choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2vw;
+    }
+    #choices button {
+      flex: 1 1 auto;
+      padding: 1em;
+      font-size: 3.5vw;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #e91e63;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    #choices button:hover {
+      background: #d81b60;
+    }
+  </style>
+</head>
+<body>
+  <div id="story">
+    <img id="slide-image" src="" alt="Слайд">
+    <div id="overlay">
+      <div id="text"></div>
+      <div id="choices"></div>
+    </div>
+  </div>
+  <script>
+    const defaultBg = 'background_gothic_hall.png';
+    const slides = [
+      { img:'A_digital_painting_in_a_semi-realistic_style_depic.png', text:'', choices:[{t:'Начать',n:1}] },
+      { img:'A_semi-realistic_digital_painting_depicts_a_crossr.png', text:'Ты стоишь перед воротами старинного университета Ливмор. Первый день семестра, и в воздухе предвкушение приключений.', choices:[{t:'В библиотеку',n:2},{t:'В кафе',n:3}] },
+      { img:'A_ofA_digital_painting_in_a_semi-realistic_style_d.png', text:'В библиотеке ты натыкаешься на таинственного молодого человека. Его взгляд встречается с твоим, и в груди словно щелкает.', choices:[{t:'Заглянуть в глаза',n:4}] },
+      { img:'cafe_scene.png', text:'В уютном кафе ты слышишь знакомый голос. Он предлагает тебе свой столик и улыбается загадочной улыбкой.', choices:[{t:'Сесть за столик',n:4}] },
+      { img:'A_semi-realistic_digital_painting_depicts_a_young_.png', text:'Он представляет себя Александром Романовым, наследником старинного рода. Приглашает тебя на бал-маскарад сегодня ночью.', choices:[{t:'Согласиться',n:5},{t:'Отказаться',n:6}] },
+      { img:'A_semi-realistic_digital_painting_depicts_a_couple.png', text:'Ты появляешься на балу в маске, и музыка зовёт вас на танец.', choices:[{t:'Танцевать всю ночь',n:7}] },
+      { img:'A_semi-realistic_digital_painting_depicts_a_young_.png', text:'Ты уходишь в общежитие с горечью упущенной возможности.', choices:[{t:'Обдумать',n:7}] },
+      { img:'A_semi-realistic_digital_painting_depicts_a_Caucas.png', text:'На следующий день он приносит тебе письмо с золотой печатью. В руках конверт, сердце бьётся быстрее.', choices:[{t:'Читать при друзьях',n:8},{t:'Читать наедине',n:9}] },
+      { img:'A_semi-realistic_digital_painting_captures_four_yo.png', text:'Ты показываешь письмо друзьям, и они смеются от слов любви.', choices:[{t:'Пережить момент',n:10}] },
+      { img:'A_semi-realistic_digital_painting_depicts_a_young_.png', text:'В тишине ты читаешь признание в любви. Каждое слово согревает душу.', choices:[{t:'Сохранить в сердце',n:10}] },
+      { img:'A_semi-realistic_digital_painting_depicts_conflict.png', text:'Он признаётся: его семья против отношений и просит поддержки.', choices:[{t:'Узнать причину',n:11},{t:'Ждать',n:12}] },
+      { img:'A_semi-realistic_digital_painting_illustrates_a_yo.png', text:'Ты приходишь к его матери: разговор напряжённый, но она чувствует твою искренность.', choices:[{t:'Доказывать чувства',n:13}] },
+      { img:'A_semi-realistic_oil_painting_depicts_a_young_woma.png', text:'Между вами холодок, вы оба скучаете друг по другу.', choices:[{t:'Объясниться',n:13}] },
+      { img:'A_semi-realistic_digital_painting_captures_a_young.png', text:'На рассвете вы встречаетесь в саду при фонарях. Чувства переполняют вас.', choices:[{t:'Признаться в любви',n:14},{t:'Уйти в рассвет',n:14}] },
+      { img:'A_semi-realistic_digital_painting_captures_a_young.png', text:'Ты говоришь о любви, и он отвечает взаимностью. Мир замирает только для вас.', choices:[{t:'Начать заново',n:0}] }
+    ];
+    function showSlide(i) {
+      const s = slides[i];
+      document.getElementById('slide-image').src = s.img || defaultBg;
+      document.getElementById('text').innerText = s.text;
+      const box = document.getElementById('choices'); box.innerHTML = '';
+      s.choices.forEach(c => {
+        const btn = document.createElement('button'); btn.innerText = c.t; btn.onclick = () => showSlide(c.n); box.appendChild(btn);
+      });
+    }
+    window.onload = () => showSlide(0);
+  </script>
+</body>
+</html>
